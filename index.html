@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학교 링크 모음 대시보드</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .main-logo-img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #357abd; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-success:hover { background-color: #27ae60; }
+        .btn-warning { background-color: #f1c40f; color: white; }
+        .btn-warning:hover { background-color: #d4ac0d; }
+        
+        /* 작은버튼 스타일 */
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .btn-secondary { background-color: #e0e0e0; color: #333; }
+        .btn-secondary:hover { background-color: #d0d0d0; }
+
+        /* 방문자 링크 그리드 */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .link-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: var(--primary-color);
+        }
+        
+        .link-icon {
+            background-color: #eef4fe;
+            color: var(--primary-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .link-info { flex-grow: 1; }
+        .link-info h3 { margin: 0 0 0.4rem 0; color: #222; font-size: 1.1rem; }
+        .link-info p { margin: 0; color: #666; font-size: 0.88rem; line-height: 1.4; }
+
+        /* 관리자 섹션 */
+        .admin-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        .form-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .form-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #444; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-color); outline: none; }
+        
+        .hidden { display: none !important; }
+        
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+            gap: 15px;
+        }
+        .admin-item-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+        .admin-item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+        .settings-zone {
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title-area">
+            <img id="main-logo-display" class="main-logo-img hidden" alt="학교 로고">
+            <h1 id="main-title-display">🏫 우리 학교 링크 모음</h1>
+        </div>
+        <div>
+            <button id="btn-admin-toggle" class="btn btn-primary" onclick="toggleAdminMode()">관리자 로그인</button>
+            <button id="btn-logout" class="btn btn-danger hidden" onclick="logoutAdmin()">관리자 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- 1. 관리자 패널 -->
+        <div id="admin-page" class="admin-section hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <h2>🛠️ 관리자 설정 패널</h2>
+                <!-- [.txt 다운로드로 변경된 버튼] -->
+                <button class="btn btn-success" onclick="downloadCurrentCodeAsTxt()">💾 최신 코드 .txt 파일로 다운로드</button>
+            </div>
+            <p style="color:#666; font-size: 0.9rem;">수정 사항을 적용한 뒤 다운받은 텍스트(.txt) 파일 안의 코드를 복사하여 index.html에 붙여넣으세요.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;">
+            
+            <!-- 사이트 헤더 설정 구역 -->
+            <div class="settings-zone">
+                <h3 style="margin-top: 0;">🏛️ 사이트 헤더 설정 (타이틀 및 로고 마크)</h3>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label for="input-site-title">좌측 상단 타이틀 이름 수정</label>
+                        <input type="text" id="input-site-title" placeholder="기본값: 🏫 우리 학교 링크 모음" onchange="saveSiteHeaderSettings()">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label for="input-site-logo">학교 로고 이미지 파일 등록 (1MB 이하)</label>
+                        <input type="file" id="input-site-logo" accept="image/*" onchange="handleMainLogoUpload(this)">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="resetHeaderSettings()">타이틀 및 로고 초기화</button>
+            </div>
+
+            <div class="form-row">
+                <!-- 왼쪽: 링크 추가/수정 폼 -->
+                <div class="form-box">
+                    <h3 id="form-title">🔗 새 링크 추가하기</h3>
+                    <form id="link-form" onsubmit="saveLink(event)">
+                        <input type="hidden" id="edit-index" value="">
+                        
+                        <div class="form-group">
+                            <label for="link-title">링크 제목</label>
+                            <input type="text" id="link-title" required placeholder="예: 학교 공식 홈페이지">
+                        </div>
+                        <div class="form-group">
+                            <label for="link-url">링크 주소 (URL)</label>
+                            <input type="url" id="link-url" required placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="link-desc">링크 설명</label>
+                            <textarea id="link-desc" rows="2" placeholder="이 사이트에 대한 간단한 설명을 적어주세요."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" id="btn-submit-link" class="btn btn-primary">リンク 추가하기</button>
+                            <button type="button" id="btn-cancel-edit" class="btn btn-secondary hidden" onclick="cancelEdit()">수정 취소</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 오른쪽: 비밀번호 변경 폼 -->
+                <div class="form-box" style="border-left: 1px solid #eee; padding-left: 2rem;">
+                    <h3>🔒 관리자 비밀번호 변경</h3>
+                    <form id="pin-form" onsubmit="changePassword(event)">
+                        <div class="form-group">
+                            <label for="current-pin">현재 비밀번호</label>
+                            <input type="password" id="current-pin" required maxlength="4" placeholder="현재 4자리 비밀번호">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-pin">새로운 비밀번호</label>
+                            <input type="password" id="new-pin" required maxlength="4" pattern="\d{4}" placeholder="새로운 숫자 4자리">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-pin-confirm">새로운 비밀번호 확인</label>
+                            <input type="password" id="new-pin-confirm" required maxlength="4" pattern="\d{4}" placeholder="새로운 숫자 4자리 똑같이 입력">
+                        </div>
+                        <button type="submit" class="btn btn-success">비밀번호 변경하기</button>
+                    </form>
+                </div>
+            </div>
+
+            <br><hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;"><br>
+            <h3>현재 등록된 링크 목록 관리 (순서 변경, 수정 및 삭제)</h3>
+            <div id="admin-links-list"></div>
+        </div>
+
+        <!-- 2. 방문자 페이지 -->
+        <div id="viewer-page">
+            <div id="links-grid" class="links-grid"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentAdminPin = localStorage.getItem('schoolDashAdminPin') || "1234";
+        let siteTitle = localStorage.getItem('schoolDashSiteTitle') || "🏫 우리 학교 링크 모음";
+        let siteLogoBase64 = localStorage.getItem('schoolDashSiteLogo') || "";
+
+        let appData = JSON.parse(localStorage.getItem('schoolDashSinglePageData')) || [
+            {title: "학교 공식 홈페이지", url: "https://www.naver.com", desc: "공지사항 및 가정통신문 확인"},
+            {title: "나이스 (NEIS)", url: "https://neis.go.kr", desc: "학생 성적 및 생활기록부 관리"},
+            {title: "지능형 교육행정시스템", url: "https://evote.neis.go.kr", desc: "교직원 업무 및 교무학사 시스템"}
+        ];
+
+        let isAdmin = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initHeaderSettings();
+            renderContent();
+        });
+
+        function initHeaderSettings() {
+            document.getElementById('main-title-display').innerText = siteTitle;
+            document.getElementById('input-site-title').value = siteTitle;
+            
+            const logoImg = document.getElementById('main-logo-display');
+            if (siteLogoBase64) {
+                logoImg.src = siteLogoBase64;
+                logoImg.classList.remove('hidden');
+            } else {
+                logoImg.classList.add('hidden');
+            }
+        }
+
+        function saveSiteHeaderSettings() {
+            const val = document.getElementById('input-site-title').value.trim();
+            siteTitle = val ? val : "🏫 우리 학교 링크 모음";
+            document.getElementById('main-title-display').innerText = siteTitle;
+            localStorage.setItem('schoolDashSiteTitle', siteTitle);
+        }
+
+        function handleMainLogoUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 1024 * 1024) {
+                    alert("파일이 너무 큽니다! 1MB 이하의 이미지를 선택해 주세요.");
+                    input.value = "";
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    siteLogoBase64 = e.target.result;
+                    localStorage.setItem('schoolDashSiteLogo', siteLogoBase64);
+                    
+                    const logoImg = document.getElementById('main-logo-display');
+                    logoImg.src = siteLogoBase64;
+                    logoImg.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetHeaderSettings() {
+            if(confirm("상단 제목과 이미지를 초기 값으로 되돌리시겠습니까?")) {
+                siteTitle = "🏫 우리 학교 링크 모음";
+                siteLogoBase64 = "";
+                localStorage.removeItem('schoolDashSiteTitle');
+                localStorage.removeItem('schoolDashSiteLogo');
+                document.getElementById('input-site-logo').value = "";
+                initHeaderSettings();
+            }
+        }
+
+        function renderContent() {
+            const grid = document.getElementById('links-grid');
+            const adminList = document.getElementById('admin-links-list');
+            
+            grid.innerHTML = '';
+            adminList.innerHTML = '';
+
+            if(appData.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; padding: 3rem 0;">등록된 학교 링크가 없습니다. 관리자 로그인을 통해 링크를 추가해 주세요.</p>`;
+            }
+
+            appData.forEach((link, index) => {
+                const card = document.createElement('a');
+                card.className = 'link-card';
+                card.href = link.url;
+                card.target = '_blank';
+                card.innerHTML = `
+                    <div class="link-icon">🔗</div>
+                    <div class="link-info">
+                        <h3>${link.title}</h3>
+                        <p>${link.desc || '설명이 없습니다.'}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+
+                const adminItem = document.createElement('div');
+                adminItem.className = 'admin-item';
+                
+                const upDisabled = index === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : '';
+                const downDisabled = index === appData.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : '';
+
+                adminItem.innerHTML = `
+                    <div class="admin-item-info">
+                        <strong>${link.title}</strong>
+                        <span style="font-size:0.85rem; color:#888; word-break: break-all;">${link.url}</span>
+                        <span style="font-size:0.85rem; color:#666;">${link.desc}</span>
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="btn btn-secondary btn-sm" ${upDisabled} onclick="moveLink(${index}, -1)">▲ 위로</button>
+                        <button class="btn btn-secondary btn-sm" ${downDisabled} onclick="moveLink(${index}, 1)">▼ 아래로</button>
+                        <button class="btn btn-warning btn-sm" onclick="editLink(${index})">편집</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteLink(${index})">삭제</button>
+                    </div>
+                `;
+                adminList.appendChild(adminItem);
+            });
+        }
+
+        function moveLink(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= appData.length) return;
+            [appData[index], appData[targetIndex]] = [appData[targetIndex], appData[index]];
+            saveData();
+            renderContent();
+            cancelEdit();
+        }
+
+        function editLink(index) {
+            const link = appData[index];
+            
+            document.getElementById('edit-index').value = index;
+            document.getElementById('link-title').value = link.title;
+            document.getElementById('link-url').value = link.url;
+            document.getElementById('link-desc').value = link.desc;
+
+            document.getElementById('form-title').innerText = "✏️ 링크 수정하기";
+            document.getElementById('btn-submit-link').innerText = "수정 완료";
+            document.getElementById('btn-submit-link').className = "btn btn-warning";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+            document.getElementById('link-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-index').value = "";
+            document.getElementById('link-form').reset();
+
+            document.getElementById('form-title').innerText = "🔗 새 링크 추가하기";
+            document.getElementById('btn-submit-link').innerText = "링크 추가하기";
+            document.getElementById('btn-submit-link').className = "btn btn-primary";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
+
+        function saveLink(e) {
+            e.preventDefault();
+            const index = document.getElementById('edit-index').value;
+            const title = document.getElementById('link-title').value;
+            const url = document.getElementById('link-url').value;
+            const desc = document.getElementById('link-desc').value;
+
+            if (index === "") {
+                appData.push({ title, url, desc });
+            } else {
+                appData[parseInt(index)] = { title, url, desc };
+                cancelEdit();
+            }
+
+            saveData();
+            renderContent();
+            if(index === "") document.getElementById('link-form').reset();
+        }
+
+        function deleteLink(index) {
+            if(confirm("정말 이 링크를 삭제하시겠습니까?")) {
+                appData.splice(index, 1);
+                saveData();
+                renderContent();
+                cancelEdit();
+            }
+        }
+
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                const password = prompt("관리자 비밀번호 4자리를 입력하세요:");
+                if (password === currentAdminPin) {
+                    isAdmin = true;
+                    document.getElementById('admin-page').classList.remove('hidden');
+                    document.getElementById('btn-admin-toggle').classList.add('hidden');
+                    document.getElementById('btn-logout').classList.remove('hidden');
+                    renderContent();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else if (password !== null) {
+                    alert("비밀번호가 틀렸습니다.");
+                }
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('btn-admin-toggle').classList.remove('hidden');
+            document.getElementById('btn-logout').classList.add('hidden');
+            document.getElementById('pin-form').reset();
+            cancelEdit();
+            alert("로그아웃 되었습니다. 방문자 모드로 전환합니다.");
+        }
+
+        function changePassword(e) {
+            e.preventDefault();
+            const currentPinInput = document.getElementById('current-pin').value;
+            const newPinInput = document.getElementById('new-pin').value;
+            const newPinConfirmInput = document.getElementById('new-pin-confirm').value;
+
+            if (currentPinInput !== currentAdminPin) {
+                alert("현재 비밀번호가 일치하지 않습니다.");
+                return;
+            }
+            if (!/^\d{4}$/.test(newPinInput)) {
+                alert("새로운 비밀번호는 반드시 숫자 4자리여야 합니다.");
+                return;
+            }
+            if (newPinInput !== newPinConfirmInput) {
+                alert("새로운 비밀번호와 확인 입력이 일치하지 않습니다.");
+                return;
+            }
+
+            currentAdminPin = newPinInput;
+            localStorage.setItem('schoolDashAdminPin', newPinInput);
+            alert("🔒 관리자 비밀번호가 성공적으로 변경되었습니다!");
+            document.getElementById('pin-form').reset();
+        }
+
+        function saveData() {
+            localStorage.setItem('schoolDashSinglePageData', JSON.stringify(appData));
+        }
+
+        // [변경 핵심 로직] 최신 상태를 담아 .txt 파일 유형으로 추출해 주는 함수
+        function downloadCurrentCodeAsTxt() {
+            let docString = document.documentElement.outerHTML;
+            
+            const rawPinPattern = /let currentAdminPin = localStorage\.getItem\('schoolDashAdminPin'\) \|\| "[^"]*";/;
+            const rawTitlePattern = /let siteTitle = localStorage\.getItem\('schoolDashSiteTitle'\) \|\| "[^"]*";/;
+            const rawLogoPattern = /let siteLogoBase64 = localStorage\.getItem\('schoolDashSiteLogo'\) \|\| "[^"]*";/;
+            const rawDataPattern = /let appData = JSON\.parse\(localStorage\.getItem\('schoolDashSinglePageData'\)\) \|\| \[\s*[\s\S]*?\s*\];/;
+
+            docString = docString.replace(rawPinPattern, `let currentAdminPin = localStorage.getItem('schoolDashAdminPin') || "${currentAdminPin}";`);
+            docString = docString.replace(rawTitlePattern, `let siteTitle = localStorage.getItem('schoolDashSiteTitle') || "${siteTitle}";`);
+            docString = docString.replace(rawLogoPattern, `let siteLogoBase64 = localStorage.getItem('schoolDashSiteLogo') || "${siteLogoBase64}";`);
+            docString = docString.replace(rawDataPattern, `let appData = JSON.parse(localStorage.getItem('schoolDashSinglePageData')) || ${JSON.stringify(appData, null, 12)};`);
+
+            // 다운로드 시 관리자 창은 감추고 깨끗한 기본값 상태로 세팅
+            docString = docString.replace('class="admin-section"', 'class="admin-section hidden"');
+            docString = docString.replace('id="btn-admin-toggle" class="btn btn-primary hidden"', 'id="btn-admin-toggle" class="btn btn-primary"');
+            docString = docString.replace('id="btn-logout" class="btn btn-danger"', 'id="btn-logout" class="btn btn-danger hidden"');
+
+            // 타입을 text/plain 명시 및 파일명을 .txt로 강제 빌드
+            const blob = new Blob(["<!DOCTYPE html>\n" + docString], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "school_dashboard_code.txt"; 
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("💾 최신 소스코드가 'school_dashboard_code.txt' 파일로 내보내졌습니다!\n텍스트 파일을 열어 전체 선택(Ctrl+A) 후 복사하여 사용하세요.");
+        }
+    </script>
+</body>
+</html>
